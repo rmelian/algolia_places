@@ -1,1 +1,1 @@
-# algolia-places-dart
+# algolia places API implementation for Dart
