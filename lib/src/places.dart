@@ -14,16 +14,26 @@ class AlgoliaPlaces extends AlgoliaPlacesWebService {
 
   Future<PlacesAutocompleteResponse> autocomplete(
     String input, {
-    String sessionToken,
-    num offset,
-    GeoLocation location,
-    num radius,
+    String type,
+    int hitsPerPage,
     String language,
-    List<String> types,
-    List<Component> components,
-    bool strictbounds,
+    List<String> countries,
+    String aroundLatLng,
+    bool aroundLatLngViaIP,
+    int aroundRadius,
+    bool getRankingInfo,
   }) async {
-    final query = Query(input, language: "en");
+    final query = Query(
+      input,
+      type: type,
+      hitsPerPage: hitsPerPage,
+      language: language,
+      countries: countries,
+      aroundLatLng: aroundLatLng,
+      aroundLatLngViaIP: aroundLatLngViaIP,
+      aroundRadius: aroundRadius,
+      getRankingInfo: getRankingInfo,
+    );
     return _decodeAutocompleteResponse(await doPost(json.encode(query)));
   }
 
@@ -31,126 +41,7 @@ class AlgoliaPlaces extends AlgoliaPlacesWebService {
       PlacesAutocompleteResponse.fromJson(json.decode(res.body));
 }
 
-//class PlacesSearchResponse extends GoogleResponseList<PlacesSearchResult> {
-//  /// JSON html_attributions
-//  final List<String> htmlAttributions;
-//
-//  /// JSON next_page_token
-//  final String nextPageToken;
-//
-//  PlacesSearchResponse(
-//    String status,
-//    String errorMessage,
-//    List<PlacesSearchResult> results,
-//    this.htmlAttributions,
-//    this.nextPageToken,
-//  ) : super(
-//          status,
-//          errorMessage,
-//          results,
-//        );
-//
-//  factory PlacesSearchResponse.fromJson(Map json) => json != null
-//      ? PlacesSearchResponse(
-//          json['status'],
-//          json['error_message'],
-//          json['results']
-//              .map((r) => PlacesSearchResult.fromJson(r))
-//              .toList()
-//              .cast<PlacesSearchResult>(),
-//          (json['html_attributions'] as List).cast<String>(),
-//          json['next_page_token'])
-//      : null;
-//}
-//
-//class PlacesSearchResult {
-//  final String icon;
-//  final Geometry geometry;
-//  final String name;
-//
-//  /// JSON opening_hours
-//  final OpeningHours openingHours;
-//
-//  final List<Photo> photos;
-//
-//  /// JSON place_id
-//  final String placeId;
-//
-//  final String scope;
-//
-//  /// JSON alt_ids
-//  final List<AlternativeId> altIds;
-//
-//  /// JSON price_level
-//  final PriceLevel priceLevel;
-//
-//  final num rating;
-//
-//  final List<String> types;
-//
-//  final String vicinity;
-//
-//  /// JSON formatted_address
-//  final String formattedAddress;
-//
-//  /// JSON permanently_closed
-//  final bool permanentlyClosed;
-//
-//  final String id;
-//
-//  final String reference;
-//
-//  PlacesSearchResult(
-//    this.icon,
-//    this.geometry,
-//    this.name,
-//    this.openingHours,
-//    this.photos,
-//    this.placeId,
-//    this.scope,
-//    this.altIds,
-//    this.priceLevel,
-//    this.rating,
-//    this.types,
-//    this.vicinity,
-//    this.formattedAddress,
-//    this.permanentlyClosed,
-//    this.id,
-//    this.reference,
-//  );
-//
-//  factory PlacesSearchResult.fromJson(Map json) => json != null
-//      ? PlacesSearchResult(
-//          json['icon'],
-//          Geometry.fromJson(json['geometry']),
-//          json['name'],
-//          null,
-//          json['photos']
-//              ?.map((p) => Photo.fromJson(p))
-//              ?.toList()
-//              ?.cast<Photo>(),
-//          json['place_id'],
-//          json['scope'],
-//          json['alt_ids']
-//              ?.map((a) => AlternativeId.fromJson(a))
-//              ?.toList()
-//              ?.cast<AlternativeId>(),
-//          json['price_level'] != null
-//              ? PriceLevel.values.elementAt(json['price_level'])
-//              : null,
-//          json['rating'],
-//          (json['types'] as List)?.cast<String>(),
-//          json['vicinity'],
-//          json['formatted_address'],
-//          json['permanently_closed'],
-//          json['id'],
-//          json['reference'])
-//      : null;
-//}
-
 class PlacesAutocompleteResponse extends GoogleResponseStatus {
-//  final List<Prediction> predictions;
-
   final List<Hit> hits;
   final int nbHits;
   final int processingTimeMS;
@@ -375,17 +266,48 @@ class Highlight {
 }
 
 class Query {
-  Query(this.query, {this.language});
+  Query(
+    this.query, {
+    this.type,
+    this.hitsPerPage: 20,
+    this.language,
+    this.countries,
+    this.aroundLatLng,
+    this.aroundLatLngViaIP: true,
+    this.aroundRadius,
+    this.getRankingInfo: false,
+  });
 
   Map<String, dynamic> toJson() {
     return <String, dynamic>{
       'query': query,
-      if (language != null) 'language': language,
+      if (type != null)
+        'type': type,
+      if (hitsPerPage != null)
+        'hitsPerPage': hitsPerPage,
+      if (language != null)
+        'language': language,
+//      if (countries?.isNotEmpty) 'countries': countries,
+      if (aroundLatLng != null)
+        'aroundLatLng': aroundLatLng,
+      if (aroundLatLngViaIP != null)
+        'aroundLatLngViaIP': aroundLatLngViaIP,
+      if (aroundRadius != null)
+        'aroundRadius': aroundRadius,
+      if (aroundRadius != null)
+        'getRankingInfo': getRankingInfo,
     };
   }
 
   final String query;
+  final String type;
+  final int hitsPerPage;
   final String language;
+  final List<String> countries;
+  final String aroundLatLng;
+  final bool aroundLatLngViaIP;
+  final int aroundRadius;
+  final bool getRankingInfo;
 
   @override
   String toString() {
